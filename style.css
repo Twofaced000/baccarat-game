@@ -680,6 +680,46 @@ body {
   background: linear-gradient(135deg, #f87171, #b91c1c);
 }
 
+/* 圖片預覽彈窗樣式 (相容手機 Safari) */
+.image-preview-card {
+  max-width: 90vw !important;
+  width: 500px !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  padding: 20px 16px !important;
+}
+
+.preview-modal-title {
+  color: var(--gold-bright);
+  font-size: 16px;
+}
+
+.preview-modal-desc {
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+.preview-img-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 8px 0;
+  background: #000;
+}
+
+.preview-img-container img {
+  width: 100%;
+  height: auto;
+  display: block;
+  -webkit-touch-callout: default !important; /* 確保 iOS 允許長按儲存 */
+}
+
+.preview-modal-actions {
+  width: 100%;
+}
+
 /* =========================================
    蒙地卡羅模擬與資金走向圖表樣式
    ========================================= */

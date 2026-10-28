@@ -239,6 +239,20 @@
         </div>
       </div>
     </div>
+
+    <!-- 手機端專用圖片預覽/儲存彈窗 (相容 iOS Safari 長按儲存) -->
+    <div class="modal-overlay" id="imagePreviewModal" style="display: none;">
+      <div class="modal-card image-preview-card">
+        <h3 class="preview-modal-title">📄 長按圖片即可儲存至相簿</h3>
+        <p class="preview-modal-desc">iOS Safari 限制直接下載，請長按下方圖片並選擇「儲存影像」：</p>
+        <div class="preview-img-container">
+          <img id="previewModalImage" src="" alt="報告截圖">
+        </div>
+        <div class="preview-modal-actions">
+          <button id="closePreviewModalBtn" class="btn btn-primary">關閉預覽</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

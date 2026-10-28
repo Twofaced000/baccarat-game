@@ -514,7 +514,70 @@ function renderPlayerHistoryTable() {
     });
 }
 
-function setupPlayerHistoryEvents() {
+// ------------------------------------------
+// 通用下載與手機端相容觸發工具
+// ------------------------------------------
+function triggerDownloadOrShare(dataUri, fileName, mimeType = 'image/png') {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    // 1. 若為手機端，且支援原生 Web Share API（可直接分享/儲存到 iOS 檔案或相簿）
+    if (isMobile && navigator.share && navigator.canShare) {
+        try {
+            fetch(dataUri)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], fileName, { type: mimeType });
+                    if (navigator.canShare({ files: [file] })) {
+                        navigator.share({
+                            files: [file],
+                            title: fileName,
+                            text: '皇家百家樂報告'
+                        }).catch(e => {
+                            // 若使用者取消分享或失敗，退回彈窗長按儲存
+                            fallbackMobileDisplay(dataUri, fileName, mimeType);
+                        });
+                        return;
+                    }
+                    fallbackMobileDisplay(dataUri, fileName, mimeType);
+                })
+                .catch(() => fallbackMobileDisplay(dataUri, fileName, mimeType));
+            return;
+        } catch (e) {
+            console.warn('Share error:', e);
+        }
+    }
+
+    // 2. 一般下載（PC 或支援 download 屬性的環境）
+    try {
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(() => {
+            document.body.removeChild(link);
+        }, 300);
+    } catch (e) {
+        fallbackMobileDisplay(dataUri, fileName, mimeType);
+    }
+}
+
+function fallbackMobileDisplay(dataUri, fileName, mimeType) {
+    if (mimeType.startsWith('image/')) {
+        const modal = document.getElementById('imagePreviewModal');
+        const img = document.getElementById('previewModalImage');
+        const closeBtn = document.getElementById('closePreviewModalBtn');
+        if (modal && img) {
+            img.src = dataUri;
+            modal.style.display = 'flex';
+            closeBtn.onclick = () => { modal.style.display = 'none'; };
+            return;
+        }
+    }
+    // CSV 或其他檔案，直接在分頁中開啟
+    window.open(dataUri, '_blank');
+}
     if (elExportPlayerChartPngBtn) {
         elExportPlayerChartPngBtn.addEventListener('click', exportPlayerChartPNG);
     }
@@ -549,13 +612,12 @@ function setupPlayerHistoryEvents() {
 
 function exportPlayerLogsCSV() {
     if (gameState.playerGameLogs.length === 0) return;
-    let csvContent = 'data:text/csv;charset=utf-8,\uFEFF';
+    let csvContent = '\uFEFF';
     csvContent += '【皇家百家樂 - 玩家實戰歷史資金變化紀錄】\n';
     csvContent += `匯出時間,${new Date().toLocaleString()}\n`;
     csvContent += `當前總資產,$${gameState.balance}\n\n`;
 
     csvContent += '局數(#),下注內容,本局總下注,開牌結果,閒家點數,莊家點數,盈虧變化,結算資產\n';
-    // 依順序 (第 1 局到最新局) 輸出
     const chronologicalLogs = [...gameState.playerGameLogs].reverse();
     chronologicalLogs.forEach(log => {
         const betsDesc = [];
@@ -568,13 +630,9 @@ function exportPlayerLogsCSV() {
         csvContent += `${log.round},${betDetailStr},${log.totalBet},${resText},${log.pScore},${log.bScore},${log.netChange},${log.finalBalance}\n`;
     });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `player_live_baccarat_history_${new Date().getTime()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    triggerDownloadOrShare(url, `player_live_baccarat_history_${new Date().getTime()}.csv`, 'text/csv');
 }
 
 // 匯出玩家實戰資金走勢圖 (PNG)
@@ -765,14 +823,9 @@ function exportPlayerChartPNG() {
     ctx.fillText('初始', chartX + padLeft - 10, chartY + chartH - 12);
     ctx.fillText(`第 ${logs.length} 局`, chartX + chartW - padRight - 40, chartY + chartH - 12);
 
-    // 觸發下載
+    // 觸發下載或手機端儲存
     const image = reportCanvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.setAttribute('href', image);
-    link.setAttribute('download', `player_baccarat_report_${logs.length}_rounds.png`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    triggerDownloadOrShare(image, `player_baccarat_report_${logs.length}_rounds.png`, 'image/png');
 }
 
 // ------------------------------------------
@@ -1179,13 +1232,9 @@ function exportSimulationCSV() {
         csvContent += `${row.round},${row.balance},${row.bet},${row.result}\n`;
     });
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `baccarat_martingale_report_${simResultsData.totalRounds}_rounds.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    triggerDownloadOrShare(url, `baccarat_martingale_report_${simResultsData.totalRounds}_rounds.csv`, 'text/csv');
 }
 
 function exportChartPNG() {
@@ -1263,14 +1312,9 @@ function exportChartPNG() {
     const chartH = 430;
     ctx.drawImage(chartCanvas, 35, chartY, baseW - 70, chartH);
 
-    // 6. 觸發圖片下載
+    // 6. 觸發圖片下載或手機端儲存
     const image = reportCanvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.setAttribute('href', image);
-    link.setAttribute('download', `baccarat_full_report_${simResultsData.totalRounds}_rounds.png`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    triggerDownloadOrShare(image, `baccarat_full_report_${simResultsData.totalRounds}_rounds.png`, 'image/png');
 }
 
 
