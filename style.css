@@ -835,3 +835,215 @@ body {
   pointer-events: none;
 }
 
+/* =========================================
+   手機響應式 RWD 專屬優化 (Mobile Responsive)
+   ========================================= */
+@media (max-width: 768px) {
+  body {
+    padding: 6px;
+    align-items: flex-start;
+  }
+
+  .casino-table {
+    padding: 14px 10px;
+    border-width: 6px;
+    border-radius: 20px;
+    gap: 14px;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* 頂部資訊列：自適應換行與精簡 */
+  .table-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+  }
+
+  .branding {
+    text-align: center;
+  }
+
+  .branding h1 {
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
+
+  .account-panel {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .deck-box, .balance-box, .total-bet-box {
+    padding: 4px 6px;
+    min-width: unset;
+    text-align: center;
+  }
+
+  .balance-header {
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .deck-box .value, .balance-box .value, .total-bet-box .value {
+    font-size: 14px;
+  }
+
+  .deck-box .label, .balance-box .label, .total-bet-box .label {
+    font-size: 10px;
+  }
+
+  /* 發牌區：改為流暢上下或精簡對峙版型，絕對不溢出 */
+  .game-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 6px;
+  }
+
+  .center-display {
+    order: 2;
+    width: 100%;
+  }
+
+  .status-banner {
+    font-size: 12px;
+    padding: 4px 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .player-hand-area {
+    order: 1;
+    width: 100%;
+  }
+
+  .banker-hand-area {
+    order: 3;
+    width: 100%;
+  }
+
+  /* 縮小牌張以適配小螢幕，並允許橫向彈性排列 */
+  .cards-container {
+    min-height: 85px;
+    gap: 6px;
+  }
+
+  .card {
+    width: 58px;
+    height: 84px;
+    padding: 4px 5px;
+    font-size: 13px;
+  }
+
+  .card .suit {
+    font-size: 18px;
+  }
+
+  /* 下注格 */
+  .betting-grid {
+    gap: 8px;
+  }
+
+  .bet-spot {
+    padding: 10px 4px;
+    min-height: 85px;
+  }
+
+  .spot-player .spot-title,
+  .spot-tie .spot-title,
+  .spot-banker .spot-title {
+    font-size: 14px;
+  }
+
+  .spot-payout {
+    font-size: 10px;
+  }
+
+  .bet-amount {
+    font-size: 13px;
+  }
+
+  /* 控制盤與籌碼選擇器 */
+  .table-controls {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 8px;
+  }
+
+  .chips-selector {
+    width: 100%;
+    justify-content: space-around;
+    gap: 4px;
+  }
+
+  .chip {
+    width: 44px;
+    height: 44px;
+    font-size: 13px;
+    border-width: 2px;
+  }
+
+  .chip-allin {
+    font-size: 10px;
+  }
+
+  .action-buttons {
+    width: 100%;
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .action-buttons .btn {
+    flex: 1;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  /* 歷史紀錄與模擬器欄位適配 */
+  .player-history-header, .sim-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .history-actions, .sim-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .history-actions .btn, .sim-actions .btn {
+    width: 100%;
+  }
+
+  .sim-params-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .sim-params-bar label, .limit-group {
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sim-params-bar input, .sim-params-bar select {
+    width: 120px;
+  }
+
+  .sim-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #bankrollChart {
+    height: 220px;
+  }
+
+  .chart-container {
+    min-height: 220px;
+  }
+}
+
