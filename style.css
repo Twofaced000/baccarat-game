@@ -1,0 +1,837 @@
+:root {
+  --felt-green: #0d4b2e;
+  --felt-dark: #082919;
+  --gold: #d4af37;
+  --gold-bright: #ffd700;
+  --player-blue: #1e88e5;
+  --banker-red: #e53935;
+  --tie-green: #43a047;
+  --card-bg: #ffffff;
+  --text-light: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: radial-gradient(circle at center, #1b382b 0%, #0c1611 100%);
+  color: var(--text-light);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* 擬真毛氈賭桌外框 */
+.casino-table {
+  width: 100%;
+  max-width: 960px;
+  background: radial-gradient(circle, var(--felt-green) 20%, var(--felt-dark) 100%);
+  border: 14px solid #3d2714;
+  border-radius: 40px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), inset 0 0 60px rgba(0, 0, 0, 0.7);
+  padding: 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+}
+
+/* 頂部 Header */
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px dashed rgba(212, 175, 55, 0.3);
+  padding-bottom: 12px;
+}
+
+.branding h1 {
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--gold-bright);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.branding .subtitle {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #bbb;
+}
+
+.account-panel {
+  display: flex;
+  gap: 16px;
+}
+
+.balance-box, .total-bet-box, .deck-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--gold);
+  border-radius: 8px;
+  padding: 6px 14px;
+  text-align: right;
+}
+
+.deck-box {
+  border-color: rgba(255, 255, 255, 0.25);
+  min-width: 90px;
+}
+
+.deck-box .value {
+  font-size: 17px;
+  font-weight: bold;
+  color: #60a5fa;
+}
+
+.balance-box {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.balance-box:hover {
+  background: rgba(212, 175, 55, 0.15);
+  border-color: var(--gold-bright);
+}
+
+.balance-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.edit-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.balance-box:hover .edit-btn,
+.edit-btn:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.balance-box .label, .total-bet-box .label {
+  display: block;
+  font-size: 11px;
+  color: #bbb;
+}
+
+.balance-box .value {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--gold-bright);
+}
+
+.total-bet-box .value {
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 遊戲發牌區 */
+.game-stage {
+  display: grid;
+  grid-template-columns: 1fr 140px 1fr;
+  align-items: center;
+  min-height: 180px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.hand-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.hand-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-hand-area h2 {
+  color: var(--player-blue);
+  font-size: 18px;
+}
+
+.banker-hand-area h2 {
+  color: var(--banker-red);
+  font-size: 18px;
+}
+
+.score-badge {
+  background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.3);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #fff;
+}
+
+/* 撲克牌容器 */
+.cards-container {
+  display: flex;
+  gap: 8px;
+  min-height: 110px;
+  min-width: 140px;
+  justify-content: center;
+}
+
+/* 單張撲克牌 */
+.card {
+  width: 72px;
+  height: 104px;
+  background: var(--card-bg);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6px 8px;
+  font-weight: bold;
+  font-size: 16px;
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: dealCard 0.4s ease-out;
+}
+
+@keyframes dealCard {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card.red {
+  color: #d32f2f;
+}
+
+.card.black {
+  color: #212121;
+}
+
+.card .suit {
+  font-size: 24px;
+  align-self: center;
+}
+
+.card .rank-bottom {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+.center-display {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.status-banner {
+  font-size: 14px;
+  color: var(--gold-bright);
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.5);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(212,175,55,0.4);
+}
+
+/* 下注格 (Betting Spots) */
+.betting-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.bet-spot {
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bet-spot:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.spot-player {
+  border-color: var(--player-blue);
+}
+.spot-player .spot-title {
+  color: var(--player-blue);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.spot-tie {
+  border-color: var(--tie-green);
+}
+.spot-tie .spot-title {
+  color: var(--tie-green);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.spot-banker {
+  border-color: var(--banker-red);
+}
+.spot-banker .spot-title {
+  color: var(--banker-red);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.spot-payout {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.bet-amount {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--gold-bright);
+}
+
+/* 籌碼堆視覺 */
+.chip-stack {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* 下方控制盤與籌碼選擇器 */
+.table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  padding: 12px 20px;
+  border-radius: 14px;
+}
+
+.chips-selector {
+  display: flex;
+  gap: 12px;
+}
+
+.chip {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 15px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(255,255,255,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 3px dashed #fff;
+}
+
+.chip:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+.chip.selected {
+  transform: translateY(-6px) scale(1.1);
+  box-shadow: 0 0 15px var(--gold-bright), 0 6px 10px rgba(0,0,0,0.7);
+}
+
+.chip-10 { background: #3b82f6; }
+.chip-50 { background: #10b981; }
+.chip-100 { background: #ef4444; }
+.chip-500 { background: #8b5cf6; }
+.chip-allin {
+  background: linear-gradient(135deg, #f59e0b, #dc2626);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  border-style: solid;
+  border-color: #ffd700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+.chip-allin.active-allin {
+  box-shadow: 0 0 18px #ef4444, 0 6px 12px rgba(0,0,0,0.8);
+}
+
+/* 按鈕樣式 */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #ffd700, #b8860b);
+  color: #211c00;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.btn-primary:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 路單 (Roadmap Bead Plate) */
+.roadmap-section {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.roadmap-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #bbb;
+  margin-bottom: 8px;
+}
+
+.counts {
+  display: flex;
+  gap: 12px;
+}
+
+.count-tag.p-tag b { color: var(--player-blue); }
+.count-tag.b-tag b { color: var(--banker-red); }
+.count-tag.t-tag b { color: var(--tie-green); }
+
+.roadmap-grid {
+  display: grid;
+  grid-template-rows: repeat(6, 22px);
+  grid-auto-flow: column;
+  grid-auto-columns: 22px;
+  gap: 4px;
+  overflow-x: auto;
+  min-height: 160px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.road-cell {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.road-cell.P {
+  background: var(--player-blue);
+}
+
+.road-cell.B {
+  background: var(--banker-red);
+}
+
+.road-cell.T {
+  background: var(--tie-green);
+}
+
+/* =========================================
+   玩家實戰資產歷史紀錄樣式
+   ========================================= */
+.player-history-section {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.player-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.history-title h3 {
+  font-size: 15px;
+  color: var(--gold-bright);
+}
+
+.history-sub {
+  font-size: 11px;
+  color: #999;
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.history-actions .btn {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+.player-history-table-wrapper {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.player-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: center;
+}
+
+.player-history-table th {
+  background: rgba(255, 255, 255, 0.08);
+  color: #bbb;
+  padding: 6px 8px;
+  position: sticky;
+  top: 0;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-history-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.player-history-table tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.no-record {
+  color: #777;
+  padding: 20px !important;
+}
+
+/* =========================================
+   破產彈窗 Modal 樣式
+   ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeInModal 0.3s ease-out;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-card {
+  background: radial-gradient(circle at center, #2a1111 0%, #150505 100%);
+  border: 3px solid #ef4444;
+  box-shadow: 0 0 50px rgba(239, 68, 68, 0.5), inset 0 0 30px rgba(0, 0, 0, 0.8);
+  border-radius: 20px;
+  padding: 36px 32px;
+  text-align: center;
+  max-width: 440px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: popModal 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popModal {
+  from {
+    transform: scale(0.7) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-icon {
+  font-size: 54px;
+  animation: shakeIcon 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes shakeIcon {
+  0% { transform: rotate(-5deg) scale(1); }
+  100% { transform: rotate(5deg) scale(1.1); }
+}
+
+.modal-title {
+  font-size: 28px;
+  color: #ef4444;
+  letter-spacing: 2px;
+  text-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+}
+
+.modal-desc {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.6;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.modal-buttons .btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+}
+
+.modal-buttons .btn-primary {
+  background: linear-gradient(135deg, #ef4444, #991b1b);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.modal-buttons .btn-primary:hover {
+  background: linear-gradient(135deg, #f87171, #b91c1c);
+}
+
+/* =========================================
+   蒙地卡羅模擬與資金走向圖表樣式
+   ========================================= */
+.simulation-section {
+  background: rgba(10, 20, 15, 0.85);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 10px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.sim-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.sim-title h2 {
+  font-size: 18px;
+  color: var(--gold-bright);
+}
+
+.sim-tag {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.sim-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sim-params-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  align-items: center;
+}
+
+.sim-params-bar label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ddd;
+}
+
+.limit-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checkbox-label {
+  cursor: pointer;
+  color: var(--gold-bright) !important;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--gold-bright);
+}
+
+.sim-params-bar input,
+.sim-params-bar select {
+  background: #111;
+  border: 1px solid #444;
+  color: var(--gold-bright);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.sim-params-bar input {
+  width: 90px;
+}
+
+/* 統計指標卡片 */
+.sim-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.stat-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: #999;
+}
+
+.stat-val {
+  font-size: 15px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.stat-val.profit-pos {
+  color: #4ade80;
+}
+
+.stat-val.profit-neg {
+  color: #f87171;
+}
+
+/* Canvas 圖表區 */
+.chart-container {
+  position: relative;
+  background: #090e0c;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px;
+  overflow: hidden;
+  min-height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#bankrollChart {
+  width: 100%;
+  height: 280px;
+  display: block;
+}
+
+.chart-placeholder {
+  position: absolute;
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+}
+

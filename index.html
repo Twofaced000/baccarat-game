@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>皇家百家樂 - Royal Baccarat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="casino-table">
+    <!-- 頂部資訊列：餘額與狀態提示 -->
+    <header class="table-header">
+      <div class="branding">
+        <h1>ROYAL BACCARAT</h1>
+        <span class="subtitle">CASINO CLASSIC</span>
+      </div>
+      <div class="account-panel">
+        <div class="deck-box" title="8副牌 (共416張)，少於20張時自動重新洗牌">
+          <span class="label">牌靴剩餘</span>
+          <span class="value" id="deckRemainingDisplay">416 張</span>
+        </div>
+        <div class="balance-box" id="balanceBox" title="點擊修改總餘額">
+          <div class="balance-header">
+            <span class="label">總籌碼餘額</span>
+            <button id="editBalanceBtn" class="edit-btn" title="自訂餘額">✏️</button>
+          </div>
+          <span class="value" id="balanceDisplay">$1,000</span>
+        </div>
+        <div class="total-bet-box">
+          <span class="label">本局總下注</span>
+          <span class="value" id="currentTotalBetDisplay">$0</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 發牌區（閒家 VS 莊家） -->
+    <main class="game-stage">
+      <!-- 閒家區 -->
+      <section class="hand-area player-hand-area">
+        <div class="hand-title">
+          <h2>閒家 PLAYER</h2>
+          <div class="score-badge" id="playerScore">-</div>
+        </div>
+        <div class="cards-container" id="playerCards">
+          <!-- 撲克牌動態生成 -->
+        </div>
+      </section>
+
+      <!-- 中間提示或倒數區 -->
+      <div class="center-display">
+        <div class="status-banner" id="gameStatus">請選擇籌碼並在區域下注</div>
+      </div>
+
+      <!-- 莊家區 -->
+      <section class="hand-area banker-hand-area">
+        <div class="hand-title">
+          <h2>莊家 BANKER</h2>
+          <div class="score-badge" id="bankerScore">-</div>
+        </div>
+        <div class="cards-container" id="bankerCards">
+          <!-- 撲克牌動態生成 -->
+        </div>
+      </section>
+    </main>
+
+    <!-- 下注區域 (Betting Spots) -->
+    <section class="betting-grid">
+      <!-- 閒家下注區 (1:1) -->
+      <div class="bet-spot spot-player" data-target="player">
+        <div class="spot-title">閒 PLAYER</div>
+        <div class="spot-payout">1 : 1</div>
+        <div class="chip-stack" id="chipStackPlayer"></div>
+        <div class="bet-amount" id="betAmountPlayer">$0</div>
+      </div>
+
+      <!-- 和局下注區 (1:8) -->
+      <div class="bet-spot spot-tie" data-target="tie">
+        <div class="spot-title">和 TIE</div>
+        <div class="spot-payout">8 : 1</div>
+        <div class="chip-stack" id="chipStackTie"></div>
+        <div class="bet-amount" id="betAmountTie">$0</div>
+      </div>
+
+      <!-- 莊家下注區 (1:0.95) -->
+      <div class="bet-spot spot-banker" data-target="banker">
+        <div class="spot-title">莊 BANKER</div>
+        <div class="spot-payout">1 : 0.95 (免佣除外)</div>
+        <div class="chip-stack" id="chipStackBanker"></div>
+        <div class="bet-amount" id="betAmountBanker">$0</div>
+      </div>
+    </section>
+
+    <!-- 控制區與籌碼盤 -->
+    <footer class="table-controls">
+      <!-- 籌碼選擇器 -->
+      <div class="chips-selector">
+        <div class="chip chip-10 selected" data-value="10">10</div>
+        <div class="chip chip-50" data-value="50">50</div>
+        <div class="chip chip-100" data-value="100">100</div>
+        <div class="chip chip-500" data-value="500">500</div>
+        <button id="customChipBtn" class="chip chip-allin" title="全押下注 (ALL IN)">ALL IN</button>
+      </div>
+
+      <!-- 操作按鈕 -->
+      <div class="action-buttons">
+        <button id="clearBetBtn" class="btn btn-secondary">清除下注</button>
+        <button id="dealBtn" class="btn btn-primary" disabled>開始發牌 (DEAL)</button>
+        <button id="newRoundBtn" class="btn btn-secondary" style="display:none;">下一局</button>
+      </div>
+    </footer>
+
+    <!-- 路單 (Roadmap / 大路 Bead Plate 歷史紀錄) -->
+    <section class="roadmap-section">
+      <div class="roadmap-header">
+        <span>歷史路單 (BEAD ROAD)</span>
+        <div class="counts">
+          <span class="count-tag p-tag">閒: <b id="countPlayer">0</b></span>
+          <span class="count-tag b-tag">莊: <b id="countBanker">0</b></span>
+          <span class="count-tag t-tag">和: <b id="countTie">0</b></span>
+        </div>
+      </div>
+      <div class="roadmap-grid" id="roadmapGrid">
+        <!-- JS 動態填入路單珠子 -->
+      </div>
+    </section>
+
+    <!-- 玩家實戰歷史資金變化紀錄 (Player Live Bankroll History & Table) -->
+    <section class="player-history-section">
+      <div class="player-history-header">
+        <div class="history-title">
+          <h3>📜 玩家實戰資產歷史紀錄 (Live Bankroll Log)</h3>
+          <span class="history-sub">記錄本局遊戲每一步下注與資產增減</span>
+        </div>
+        <div class="history-actions">
+          <button id="exportPlayerChartPngBtn" class="btn btn-secondary" disabled>🖼️ 匯出玩家資金報告圖 (PNG)</button>
+          <button id="exportPlayerLogCsvBtn" class="btn btn-secondary" disabled>📥 匯出玩家資金紀錄 CSV</button>
+          <button id="clearPlayerLogBtn" class="btn btn-secondary">清空紀錄</button>
+        </div>
+      </div>
+      <div class="player-history-table-wrapper">
+        <table class="player-history-table">
+          <thead>
+            <tr>
+              <th>局數 (#)</th>
+              <th>下注內容</th>
+              <th>總下注</th>
+              <th>開牌結果</th>
+              <th>牌局點數</th>
+              <th>盈虧變化</th>
+              <th>結算資產</th>
+            </tr>
+          </thead>
+          <tbody id="playerHistoryBody">
+            <tr>
+              <td colspan="7" class="no-record">尚未進行實戰牌局，完成一局後將自動記錄</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 蒙地卡羅策略模擬與資金走向 (Monte Carlo Simulation & Bankroll Chart) -->
+    <section class="simulation-section">
+      <div class="sim-header">
+        <div class="sim-title">
+          <h2>📊 蒙地卡羅模擬器 (Monte Carlo Simulation)</h2>
+          <span class="sim-tag">馬丁格爾倍投策略 (Martingale System)</span>
+        </div>
+        <div class="sim-actions">
+          <button id="runSimBtn" class="btn btn-primary">🚀 執行 10,000 局模擬</button>
+          <button id="exportCsvBtn" class="btn btn-secondary" disabled>📥 匯出完整 CSV</button>
+          <button id="exportChartBtn" class="btn btn-secondary" disabled>🖼️ 匯出完整報告圖 (PNG)</button>
+        </div>
+      </div>
+
+      <!-- 模擬參數設定列 -->
+      <div class="sim-params-bar">
+        <label>初始本金: $<input type="number" id="simStartingBalance" value="10000" step="500" min="100"></label>
+        <label>基礎起注: $<input type="number" id="simBaseBet" value="100" step="10" min="1"></label>
+        <div class="limit-group">
+          <label for="simMaxTableBet">賭桌上限: $</label>
+          <input type="number" id="simMaxTableBet" value="5000" step="500" min="100" title="賭場所設的單注最高下注上限">
+          <label class="checkbox-label" title="勾選後下注將不受賭桌上限限制，僅受限於玩家剩餘資金">
+            <input type="checkbox" id="simNoLimit"> 無上限
+          </label>
+        </div>
+        <label>策略目標:
+          <select id="simBetTarget">
+            <option value="player">閒家 (Player 1:1)</option>
+            <option value="banker" selected>莊家 (Banker 1:0.95)</option>
+          </select>
+        </label>
+        <label>模擬局數: <input type="number" id="simRounds" value="10000" step="1000" min="100" max="50000"></label>
+      </div>
+
+      <!-- 統計數據指標板 -->
+      <div class="sim-stats-grid" id="simStatsGrid" style="display: none;">
+        <div class="stat-card">
+          <span class="stat-label">最終資產 (Final Balance)</span>
+          <span class="stat-val" id="statFinalBal">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">淨利 / 淨損 (Net Profit)</span>
+          <span class="stat-val" id="statNetProfit">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">破產局數 (Bust At Round)</span>
+          <span class="stat-val" id="statBustRound">未破產</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">最大連續落敗 (Max Loss Streak)</span>
+          <span class="stat-val" id="statMaxLossStreak">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">資產峰值 (Peak Bankroll)</span>
+          <span class="stat-val" id="statPeakBal">-</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">最高單注下注 (Max Single Bet)</span>
+          <span class="stat-val" id="statMaxBet">-</span>
+        </div>
+      </div>
+
+      <!-- 資金走向 Canvas 圖表 -->
+      <div class="chart-container">
+        <canvas id="bankrollChart" width="900" height="300"></canvas>
+        <div id="chartPlaceholder" class="chart-placeholder">點擊「執行 10,000 局模擬」以產生資金曲線圖表</div>
+      </div>
+    </section>
+    <!-- 破產彈窗 Modal -->
+    <div class="modal-overlay" id="bankruptcyModal" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-icon">💀</div>
+        <h2 class="modal-title">你已破產！</h2>
+        <p class="modal-desc">籌碼餘額已低於最低可下注金額 ($10)，無法繼續本局遊戲。</p>
+        <div class="modal-buttons">
+          <button id="modalRestartBtn" class="btn btn-primary">🔄 重新開始 ($1,000)</button>
+          <button id="modalExportPngBtn" class="btn btn-secondary">🖼️ 匯出本次紀錄 PNG</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
