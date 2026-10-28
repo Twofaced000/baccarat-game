@@ -916,13 +916,24 @@ function restartGameCompletely() {
 }
 
 // 啟動遊戲
-window.addEventListener('DOMContentLoaded', () => {
-    gameState.deck = createShoe(8);
-    setupControls();
-    setupPlayerHistoryEvents();
-    setupSimulation();
-    updateUI();
-});
+function initGame() {
+    try {
+        gameState.deck = createShoe(8);
+        setupControls();
+        setupPlayerHistoryEvents();
+        setupSimulation();
+        updateUI();
+        console.log('Royal Baccarat initialized successfully');
+    } catch (err) {
+        console.error('Initialization error:', err);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGame);
+} else {
+    initGame();
+}
 
 // ==========================================
 // 6. 蒙地卡羅模擬（馬丁格爾倍投）與資產圖表
