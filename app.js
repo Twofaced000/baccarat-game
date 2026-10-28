@@ -578,6 +578,8 @@ function fallbackMobileDisplay(dataUri, fileName, mimeType) {
     // CSV 或其他檔案，直接在分頁中開啟
     window.open(dataUri, '_blank');
 }
+
+function setupPlayerHistoryEvents() {
     if (elExportPlayerChartPngBtn) {
         elExportPlayerChartPngBtn.addEventListener('click', exportPlayerChartPNG);
     }
